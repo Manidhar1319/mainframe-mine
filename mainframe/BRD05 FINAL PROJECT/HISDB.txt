@@ -1,0 +1,22 @@
+  DROP TABLE HISTORY_DB;                                                00010002
+  CREATE TABLE HISTORY_DB                                               00020000
+       (                                                                00030000
+       APPLICANT_ID     CHAR(10)    NOT NULL,                           00040000
+       APPLICANT_NAME   VARCHAR(32),                                    00050000
+       DOOR_NO          CHAR(10),                                       00060000
+       STREET           CHAR(20),                                       00070000
+       CITY             CHAR(20),                                       00080000
+       STATE            CHAR(20),                                       00090000
+       PIN              INT,                                            00100000
+       CELL_PH_NO       CHAR(10),                                       00110000
+       LOAN_ID          CHAR(2)   NOT NULL UNIQUE,                      00111000
+       LOAN_TYPE        CHAR(10),                                       00112000
+       APPROVED_LOAN_AMT INT,                                           00113000
+       LOAN_APPR_DATE   DATE                                            00114000
+       )                                                                00120000
+  IN SHRDB4.SHRTS4;                                                     00130000
+  COMMIT;                                                               00140000
+  CREATE UNIQUE INDEX HDB ON                                            00150003
+  HISTORY_DB(LOAN_ID);                                                  00160005
+  COMMIT;                                                               00170000
+

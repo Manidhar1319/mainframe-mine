@@ -1,0 +1,54 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//STEP01 EXEC PGM=IDCAMS                                                00011005
+//SYSPRINT DD SYSOUT=*                                                  00012005
+//SYSOUT DD SYSOUT=*                                                    00013005
+//SYSIN DD *                                                            00014005
+    DELETE 'TECN210.BRD05.LOAN.KSDS'                                    00015005
+    DELETE 'TECN210.BRD05.PAYMENT.KSDS'                                 00016005
+    DELETE 'TECN210.BRD05.BKP.GDG'                                      00017005
+/*                                                                      00018005
+//********************************************************              00020000
+//*                 CREATION OF LOAN VSAM FILE           *              00030000
+//********************************************************              00040000
+//STEP02 EXEC PGM=IDCAMS                                                00161008
+//SYSPRINT DD SYSOUT=*                                                  00162008
+//SYSIN DD *                                                            00163008
+   DEFINE CLUSTER(NAME(TECN210.BRD05.LOAN.KSDS)-                        00164008
+                 KEYS(10 0)                    -                        00165010
+                 RECORDSIZE(80,80)             -                        00166010
+                 TRACKS(5,5)                   -                        00167010
+                 FREESPACE(10,10)              -                        00168010
+                 CISZ(4096)                    -                        00169010
+                 INDEXED                       -                        00169110
+                 VOLUME(ZAPRD4)                -                        00169210
+                 REUSE)                                                 00169308
+/*                                                                      00169409
+//********************************************************              00170001
+//*                 CREATION OF PAYMENT VSAM FILE           *           00180001
+//********************************************************              00190001
+//STEP03 EXEC PGM=IDCAMS                                                00200003
+//SYSPRINT DD SYSOUT=*                                                  00210001
+//SYSIN DD *                                                            00220001
+   DEFINE CLUSTER(NAME(TECN210.BRD05.PAYMENT.KSDS)-                     00230001
+                 KEYS(10 0)                       -                     00240010
+                 RECORDSIZE(80,80)                -                     00250010
+                 TRACKS(5,5)                      -                     00260010
+                 FREESPACE(10,10)                 -                     00270010
+                 CISZ(4096)                       -                     00280010
+                 INDEXED                          -                     00290010
+                 VOLUME(ZAPRD4)                   -                     00300010
+                 REUSE)                                                 00310002
+/*                                                                      00320001
+//***********************************************                       00330002
+//*                CREATION OF GDG BASE         *                       00340002
+//***********************************************                       00350002
+//STEP04 EXEC PGM=IDCAMS                                                00360003
+//SYSPRINT DD SYSOUT=*                                                  00370002
+//SYSIN DD *                                                            00380002
+   DEFINE GDG(NAME(TECN210.BRD05.BKP.GDG)-                              00390002
+              LIMIT(12)-                                                00400002
+              NOEMPTY -                                                 00410002
+              SCRATCH)                                                  00420002
+/*                                                                      00430002
+                                                                        00440007
+

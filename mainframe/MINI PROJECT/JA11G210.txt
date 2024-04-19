@@ -1,0 +1,31 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//STEP1 EXEC PGM=IDCAMS                                                 00020001
+//SYSPRINT DD SYSOUT=*                                                  00030001
+//SYSOUT DD SYSOUT=*                                                    00040001
+//SYSIN DD *                                                            00050001
+   DEFINE CLUSTER(                         -                            00060001
+      NAME(TECN210.L1B.STUDENT.REFER.KSDS) -                            00070001
+      INDEXED                              -                            00080001
+      KEYS(6,0)                            -                            00090001
+      RECSZ(80,80)                         -                            00100001
+      TRACKS(1,1)                          -                            00110001
+      FREESPACE(5,5)                       -                            00120001
+      VOLUMES(ZAPRD4)                      -                            00130001
+      CISZ(4096))                                                       00140001
+/*                                                                      00150001
+//STEP1 EXEC PGM=IDCAMS                                                 00160001
+//SYSPRINT DD SYSOUT=*                                                  00170001
+//SYSOUT DD SYSOUT=*                                                    00180001
+//SYSIN DD *                                                            00190001
+   DEFINE CLUSTER(                         -                            00200001
+      NAME(TECN210.L1B.STUDENT.OUTPUT.KSDS) -                           00210001
+      INDEXED                              -                            00220001
+      KEYS(6,0)                            -                            00230001
+      RECSZ(80,80)                         -                            00240001
+      TRACKS(1,1)                          -                            00250001
+      FREESPACE(5,5)                       -                            00260001
+      VOLUMES(ZAPRD4)                      -                            00270001
+      REUSE                                -                            00280001
+      CISZ(4096))                                                       00290001
+ /*                                                                     00300001
+

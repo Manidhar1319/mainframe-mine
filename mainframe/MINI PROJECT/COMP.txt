@@ -1,0 +1,14 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//JOBPROC JCLLIB ORDER=IBMUSER.ALL1                                     00011005
+//COBCL EXEC IGYWCL,                                                    00012005
+//          PGMLIB=TECN210.LOADMLIB.PDS,                                00013005
+//          COPYLIB=TECN210.L1B.CSDADM24.PDS,                           00014005
+//          GOPGM=CA21G210                                              00015005
+//COBOL.SYSIN DD DSN=TECN210.L1B.CSDADM24.PDS(CA21G210),DISP=SHR        00016005
+//COBCL EXEC IGYWCL,                                                    00030001
+//          PGMLIB=TECN210.LOADMLIB.PDS,                                00040001
+//          COPYLIB=TECN210.L1B.CSDADM24.PDS,                           00050002
+//          GOPGM=CA11G210                                              00060003
+//COBOL.SYSIN DD DSN=TECN210.L1B.CSDADM24.PDS(CA11G210),DISP=SHR        00070003
+//LKED.SYSLIB DD DSN=TECN210.LOADMLIB.PDS,DISP=SHR                      00080001
+

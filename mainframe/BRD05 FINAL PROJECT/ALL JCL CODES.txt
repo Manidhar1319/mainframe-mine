@@ -1,0 +1,57 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//STEP1 EXEC PGM=IDCAMS                                                 00020001
+//SYSPRINT DD SYSOUT=*                                                  00030001
+//SYSOUT   DD SYSOUT=*                                                  00040003
+//DD1      DD DSN=TECN210.LVSAM.PS1,DISP=SHR                            00050003
+//DD2      DD DSN=TECN210.BRD05.LOAN.KSDS,DISP=SHR                      00060003
+//SYSIN    DD *                                                         00070003
+   REPRO INFILE(DD1) -                                                  00080001
+         OUTFILE(DD2)                                                   00090001
+/*                                                                      00100001
+//STEP2 EXEC PGM=IDCAMS                                                 00110001
+//SYSPRINT DD SYSOUT=*                                                  00120001
+//SYSOUT   DD SYSOUT=*                                                  00130003
+//DD1      DD DSN=TECN210.PVSAM.PS2,DISP=SHR                            00140003
+//DD2      DD DSN=TECN210.BRD05.PAYMENT.KSDS,DISP=SHR                   00150003
+//SYSIN    DD *                                                         00160003
+   REPRO INFILE(DD1) -                                                  00170001
+         OUTFILE(DD2)                                                   00180001
+/*                                                                      00190001
+//STEP3 EXEC PGM=SORT                                                   00200004
+//SYSPRINT DD SYSOUT=*                                                  00210004
+//SYSOUT   DD SYSOUT=*                                                  00220004
+//SORTIN   DD DSN=TECN210.BRD05.LOAN.KSDS,DISP=SHR                      00230004
+//SORTOUT  DD DSN=TECN210.BRD05.LOAN.SORTED,                            00240005
+//            DISP=(NEW,CATLG,DELETE),                                  00240105
+//            SPACE=(TRK,(1,1)),                                        00241005
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=800)                       00242005
+//SYSIN    DD *                                                         00250004
+      SORT FIELDS=COPY                                                  00260005
+      INCLUDE COND=(12,1,CH,EQ,C'1')                                    00270005
+      OMIT COND=(1,1,CH,EQ,C'1')                                        00280005
+/*                                                                      00290004
+//STEP4 EXEC PGM=IDCAMS                                                 00300006
+//SYSPRINT DD SYSOUT=*                                                  00310006
+//SYSOUT DD SYSOUT=*                                                    00320006
+//DD1 DD DSN=TECN210.BRD05.LOAN.KSDS,DISP=SHR                           00321006
+//DD2 DD DSN=TECN210.BRD05.BKP.GDG(+1),                                 00322006
+//       DISP=(NEW,CATLG,DELETE),                                       00323006
+//       SPACE=(TRK,(1,1)),                                             00324006
+//       DCB=(RECFM=FB,LRECL=80,BLKSIZE=800)                            00325006
+//SYSIN DD *                                                            00330006
+    REPRO INFILE(DD1) -                                                 00340006
+          OUTFILE(DD2)                                                  00350006
+/*                                                                      00360006
+//STEP5 EXEC PGM=IDCAMS                                                 00370006
+//SYSPRINT DD SYSOUT=*                                                  00380006
+//SYSOUT DD SYSOUT=*                                                    00390006
+//DD1 DD DSN=TECN210.BRD05.PAYMENT.KSDS,DISP=SHR                        00400006
+//DD2 DD DSN=TECN210.BRD05.BKP.GDG(+2),                                 00410006
+//       DISP=(NEW,CATLG,DELETE),                                       00420006
+//       SPACE=(TRK,(1,1)),                                             00430006
+//       DCB=(RECFM=FB,LRECL=80,BLKSIZE=800)                            00440006
+//SYSIN DD *                                                            00450006
+    REPRO INFILE(DD1) -                                                 00460006
+          OUTFILE(DD2)                                                  00470006
+/*                                                                      00480006
+

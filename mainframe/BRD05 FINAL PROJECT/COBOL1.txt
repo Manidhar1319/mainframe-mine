@@ -1,0 +1,249 @@
+       IDENTIFICATION DIVISION.                                         00001000
+       PROGRAM-ID. BRD05CB1.                                            00002000
+       AUTHOR. BRD05.                                                   00003000
+      ****************************************************************  00003101
+      *                    PROGRAM DESCRIPTION                       *  00003201
+      ****************************************************************  00003301
+      *  THIS PROGRAM IS READING THE DATA FROM LOAN AND APPLICANT    *  00003401
+      *  DATABASE AND LOADING THAT DATA INTO HISTORY DATABASE AS PER *  00003501
+      *                     REQUIRED VALIDATIONS.                    *  00003601
+      ****************************************************************  00003701
+      *     AUTHOR : S.MADHUMITHA       (2317819)                    *  00003803
+      *              O.PRAVEEN          (2317754)                    *  00003903
+      *              V.RAVIPRAKASH      (2317838)                    *  00004003
+      *              K.LOKESH           (2317360)                    *  00004103
+      *              M.MANIDHAR         (2317376)                    *  00004201
+      ****************************************************************  00004301
+       ENVIRONMENT DIVISION.                                            00004500
+       DATA DIVISION.                                                   00005000
+       WORKING-STORAGE SECTION.                                         00006000
+       01 WS-ERR.                                                       00007000
+          05 WS-ERR-MSG.                                                00008000
+          10 WS-ERR-LEN   PIC S9(4) USAGE COMP VALUE +720.              00009001
+          10 WS-ERR-TEXT  PIC X(80) OCCURS 10 TIMES.                    00009100
+          10 WS-ERR-LRECL PIC S9(9) USAGE COMP VALUE +72.               00009200
+       01 WS-SQLCODE      PIC S999 SIGN LEADING SEPARATE.               00009301
+          88 WS-SUCCESS   VALUE 000.                                    00009401
+          88 WS-EOT       VALUE 100.                                    00009501
+           EXEC SQL INCLUDE LOANDCL END-EXEC.                           00009600
+           EXEC SQL INCLUDE HISDCL  END-EXEC.                           00009700
+           EXEC SQL INCLUDE APPDCL  END-EXEC.                           00009800
+           EXEC SQL INCLUDE SQLCA   END-EXEC.                           00009900
+      *********************CURSOR DECLARATION***************************00010001
+           EXEC SQL                                                     00010100
+             DECLARE WS-CSR CURSOR FOR                                  00011000
+               SELECT A.APPL_ID, B.APPL_NAME,                           00012000
+               B.APPL_DNO, B.APPL_STREET, B.APPL_CITY,                  00013000
+               B.APPL_STATE, B.APPL_PIN, B.APPL_CEPNO,                  00014000
+               A.APPL_LID, A.APPL_LTYPE,                                00015000
+               A.APPL_LAMT,                                             00016000
+               A.APPL_LDATE,A.APPL_LINDICAT                             00017000
+               FROM LOAN_DB A                                           00018000
+               INNER JOIN  APPLICANT_DB B ON                            00019000
+               A.APPL_ID = B.APPL_ID                                    00019100
+           END-EXEC.                                                    00019200
+      ******************************************************************00019301
+       PROCEDURE DIVISION.                                              00019400
+      ******************************************************************00019501
+       0000-MAIN-PARA.                                                  00019600
+           PERFORM 1000-INITIALIZE-PARA THRU                            00019700
+                   1000-INITIALIZE-PARA-EXIT.                           00019800
+           PERFORM 2000-PROCESS-PARA THRU                               00019900
+                   2000-PROCESS-PARA-EXIT.                              00020000
+           PERFORM 9000-TERMINATION-PARA THRU                           00020100
+                   9000-TERMINATION-PARA-EXIT.                          00020200
+       0000-MAIN-PARA-EXIT.                                             00021000
+            EXIT.                                                       00022001
+      ******************************************************************00022101
+       1000-INITIALIZE-PARA.                                            00023000
+           DISPLAY "*** VALIDATION CODE STARTED ***".                   00024000
+       1000-INITIALIZE-PARA-EXIT.                                       00025000
+           EXIT.                                                        00026000
+      ******************************************************************00026101
+       2000-PROCESS-PARA.                                               00027000
+           PERFORM 2050-CHECK-PARA THRU                                 00028000
+                   2050-CHECK-PARA-EXIT.                                00029000
+           PERFORM 2100-OPEN-PARA THRU                                  00029100
+                   2100-OPEN-PARA-EXIT.                                 00029200
+           PERFORM 2200-FETCH-PARA THRU                                 00029300
+                   2200-FETCH-PARA-EXIT                                 00029400
+                   UNTIL WS-EOT.                                        00029500
+           PERFORM 2250-DELETE-PARA THRU                                00029600
+                   2250-DELETE-PARA-EXIT.                               00029700
+           PERFORM 2300-CLOSE-PARA THRU                                 00029800
+                   2300-CLOSE-PARA-EXIT.                                00029900
+       2000-PROCESS-PARA-EXIT.                                          00030000
+           EXIT.                                                        00031000
+       2050-CHECK-PARA.                                                 00032000
+           MOVE SQLCODE TO WS-SQLCODE.                                  00033000
+           EVALUATE TRUE                                                00034000
+               WHEN WS-SUCCESS                                          00035000
+                  DISPLAY "CURSOR DECLARED SUCCESSFULLY"                00036000
+               WHEN OTHER                                               00037000
+                   DISPLAY "CURSOR DECLARATION FAILED"                  00038000
+                   DISPLAY "SQLCODE: " WS-SQLCODE                       00039000
+                   CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG,              00039100
+                   WS-ERR-LRECL                                         00039200
+                   DISPLAY WS-ERR-MSG                                   00039300
+                   PERFORM 9000-TERMINATION-PARA THRU                   00039400
+                           9000-TERMINATION-PARA-EXIT                   00039500
+           END-EVALUATE.                                                00039600
+       2050-CHECK-PARA-EXIT.                                            00039700
+           EXIT.                                                        00039800
+       2100-OPEN-PARA.                                                  00039900
+           EXEC SQL OPEN WS-CSR END-EXEC.                               00040000
+           MOVE SQLCODE TO WS-SQLCODE.                                  00041000
+           EVALUATE TRUE                                                00042000
+               WHEN WS-SUCCESS                                          00043000
+                   DISPLAY "CURSOR OPENED SUCCESSFULLY"                 00044000
+                   CONTINUE                                             00045000
+               WHEN OTHER                                               00046000
+                   DISPLAY "CURSOR FAILED TO OPEN"                      00047000
+                   DISPLAY "SQLCODE:" WS-SQLCODE                        00048001
+                   CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG,              00049000
+                   WS-ERR-LRECL                                         00049100
+                   DISPLAY WS-ERR-MSG                                   00049200
+                   PERFORM 9000-TERMINATION-PARA THRU                   00049300
+                           9000-TERMINATION-PARA-EXIT                   00049400
+           END-EVALUATE.                                                00049500
+       2100-OPEN-PARA-EXIT.                                             00049600
+           EXIT.                                                        00049700
+      ******************************************************************00049801
+      * DCLGEN DEFINITION : LD --> LOAN      DB DCLGEN                  00049901
+      *                     AD --> APPLICANT DB DCLGEN                  00050001
+      *                     HD --> HISTORY   DB DCLGEN                  00050101
+      ******************************************************************00050201
+       2200-FETCH-PARA.                                                 00050300
+           INITIALIZE AD-APPL-NAME.                                     00050400
+           MOVE SPACES TO AD-APPL-NAME-TEXT.                            00050500
+           EXEC SQL                                                     00051000
+               FETCH WS-CSR INTO :LD-APPL-ID,                           00052000
+                                 :AD-APPL-NAME,                         00053000
+                                 :AD-APPL-DNO,                          00054000
+                                 :AD-APPL-STREET,                       00055000
+                                 :AD-APPL-CITY,                         00056000
+                                 :AD-APPL-STATE,                        00057000
+                                 :AD-APPL-PIN,                          00058000
+                                 :AD-APPL-CEPNO,                        00059000
+                                 :LD-APPL-LID,                          00059100
+                                 :LD-APPL-LTYPE,                        00059200
+                                 :LD-APPL-LAMT,                         00059300
+                                 :LD-APPL-LDATE,                        00059400
+                                 :LD-APPL-LINDICAT                      00059500
+           END-EXEC.                                                    00059600
+           MOVE SQLCODE TO WS-SQLCODE.                                  00059700
+           EVALUATE TRUE                                                00059800
+               WHEN WS-SUCCESS                                          00059900
+                   DISPLAY "DATA FETCHING SUCCESSFULL"                  00060000
+                   PERFORM 3000-INSERT-PARA THRU                        00061000
+                           3000-INSERT-PARA-EXIT                        00062000
+               WHEN WS-EOT                                              00063000
+                   DISPLAY "NO MORE DATA TO FETCH"                      00064000
+                   CONTINUE                                             00065000
+               WHEN OTHER                                               00066000
+                   DISPLAY "DATA FETCHING FAILED"                       00067000
+                   DISPLAY "SQLCODE: " WS-SQLCODE                       00068000
+                   CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG,              00069000
+                   WS-ERR-LRECL                                         00069100
+                   DISPLAY WS-ERR-MSG                                   00069200
+                   PERFORM 9000-TERMINATION-PARA THRU                   00069301
+                           9000-TERMINATION-PARA-EXIT                   00069400
+           END-EVALUATE.                                                00069500
+       2200-FETCH-PARA-EXIT.                                            00069600
+           EXIT.                                                        00069700
+      ******************************************************************00069802
+       2300-CLOSE-PARA.                                                 00069902
+           EXEC SQL CLOSE WS-CSR END-EXEC.                              00070000
+           MOVE SQLCODE TO WS-SQLCODE.                                  00070100
+           EVALUATE TRUE                                                00071000
+               WHEN WS-SUCCESS                                          00072000
+                   DISPLAY "CURSOR CLOSED SUCCESSFULLY"                 00073000
+                   CONTINUE                                             00074000
+               WHEN OTHER                                               00075000
+                   DISPLAY "FAILED TO CLOSE CURSOR"                     00076000
+                   DISPLAY "SQLCODE:" WS-SQLCODE                        00077000
+                   CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG,              00078000
+                   WS-ERR-LRECL                                         00079000
+                   PERFORM 9000-TERMINATION-PARA THRU                   00079100
+                       9000-TERMINATION-PARA-EXIT                       00079200
+           END-EVALUATE.                                                00079300
+       2300-CLOSE-PARA-EXIT.                                            00079400
+           EXIT.                                                        00079500
+************************************************************************00079600
+       3000-INSERT-PARA.                                                00079700
+           IF(LD-APPL-LINDICAT = 'CLOSE' AND                            00079800
+              LD-APPL-LTYPE = 'HOUSING') THEN                           00079900
+               MOVE LD-APPL-ID TO HD-APPLICANT-ID                       00080000
+               MOVE LENGTH OF AD-APPL-NAME-TEXT TO                      00080100
+                              HD-APPLICANT-NAME-LEN                     00081000
+               MOVE AD-APPL-NAME-TEXT TO                                00082000
+                    HD-APPLICANT-NAME-TEXT                              00083000
+               MOVE AD-APPL-DNO       TO  HD-DOOR-NO                    00084000
+               MOVE AD-APPL-STREET    TO  HD-STREET                     00085000
+               MOVE AD-APPL-CITY      TO  HD-CITY                       00086000
+               MOVE AD-APPL-STATE     TO  HD-STATE                      00087000
+               MOVE AD-APPL-PIN       TO  HD-PIN                        00088000
+               MOVE AD-APPL-CEPNO     TO  HD-CELL-PH-NO                 00089000
+               MOVE LD-APPL-LID       TO  HD-LOAN-ID                    00089100
+               MOVE LD-APPL-LTYPE     TO  HD-LOAN-TYPE                  00089200
+               MOVE LD-APPL-LAMT      TO                                00089300
+                    HD-APPROVED-LOAN-AMT                                00089400
+               MOVE LD-APPL-LDATE     TO                                00089500
+                    HD-LOAN-APPR-DATE                                   00089600
+               EXEC SQL                                                 00089700
+               INSERT INTO HISTORY_DB VALUES (:HD-APPLICANT-ID,         00089801
+                                              :HD-APPLICANT-NAME,       00089901
+                                              :HD-DOOR-NO,              00090001
+                                              :HD-STREET,               00091001
+                                              :HD-CITY,                 00092001
+                                              :HD-STATE,                00093001
+                                              :HD-PIN,                  00094001
+                                              :HD-CELL-PH-NO,           00095001
+                                              :HD-LOAN-ID,              00096001
+                                              :HD-LOAN-TYPE,            00096101
+                                              :HD-APPROVED-LOAN-AMT,    00097001
+                                              :HD-LOAN-APPR-DATE)       00098001
+               END-EXEC                                                 00099000
+               MOVE SQLCODE TO WS-SQLCODE                               00099100
+               EVALUATE TRUE                                            00099200
+                   WHEN WS-SUCCESS                                      00099300
+                       DISPLAY "DATA INSERTION SUCCESSFULL"             00099400
+                       CONTINUE                                         00099500
+                    WHEN WS-EOT                                         00099600
+                         DISPLAY "NO MORE DATA TO INSERT"               00099700
+                         CONTINUE                                       00099800
+                    WHEN OTHER                                          00099900
+                        DISPLAY "FAILED TO INSERT DATA"                 00100000
+                        DISPLAY "SQLCODE: " WS-SQLCODE                  00101000
+                        CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG,         00102000
+                        WS-ERR-LRECL                                    00103000
+                        PERFORM 9000-TERMINATION-PARA THRU              00104000
+                                9000-TERMINATION-PARA-EXIT              00105000
+               END-EVALUATE                                             00106000
+               EXEC SQL                                                 00107000
+                   DELETE FROM LOAN_DB WHERE                            00108000
+                   APPL_LID = :LD-APPL-LID                              00109000
+               END-EXEC                                                 00109100
+           ELSE                                                         00109200
+               CONTINUE                                                 00109300
+           END-IF.                                                      00109400
+       3000-INSERT-PARA-EXIT.                                           00109500
+           EXIT.                                                        00109600
+      ******************************************************************00109704
+       2250-DELETE-PARA.                                                00109800
+           EXEC SQL                                                     00109900
+             DELETE FROM APPLICANT_DB                                   00110000
+             WHERE APPL_ID IN                                           00110100
+             (SELECT APPL_ID FROM LOAN_DB                               00111000
+             GROUP BY APPL_ID                                           00112000
+             HAVING SUM(CASE WHEN APPL_LINDICAT = 'OPEN' THEN 1 ELSE 0  00113000
+                    END) = 0)                                           00114000
+             END-EXEC.                                                  00115000
+       2250-DELETE-PARA-EXIT.                                           00116000
+           EXIT.                                                        00117000
+      ******************************************************************00117104
+       9000-TERMINATION-PARA.                                           00118000
+           STOP RUN.                                                    00119000
+       9000-TERMINATION-PARA-EXIT.                                      00119100
+           EXIT.                                                        00119200
+

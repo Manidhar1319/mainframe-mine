@@ -1,0 +1,20 @@
+--DROP TABLE PAYMENT_DB;                                                00010008
+  COMMIT;                                                               00020000
+  CREATE TABLE PAYMENT_DB                                               00030000
+       (                                                                00040000
+       APPL_ID      CHAR(10) NOT NULL,                                  00050004
+       APPL_LID     CHAR(2)  NOT NULL UNIQUE,                           00060007
+       AMOUNT_PAID  DECIMAL(9,2),                                       00070004
+       AMTPAID_DATE DATE,                                               00080004
+       PREVIOUS_BALANCE_AMOUNT DECIMAL(9,2),                            00090006
+       CURRENT_BALANCE_AMOUNT  DECIMAL(9,2),                            00100006
+       COLLECTION              CHAR(10),                                00110011
+       FOREIGN KEY(APPL_LID) REFERENCES LOAN_DB(APPL_LID)               00120013
+       ON DELETE CASCADE                                                00130006
+       )                                                                00140000
+  IN SHRDB4.SHRTS4;                                                     00150000
+  COMMIT;                                                               00160000
+  CREATE UNIQUE INDEX PAYMENT ON                                        00170007
+  PAYMENT_DB(APPL_LID);                                                 00180012
+  COMMIT;                                                               00190000
+

@@ -1,0 +1,30 @@
+  DROP TABLE LOAN_DB;                                                   00010015
+  COMMIT;                                                               00020000
+  CREATE TABLE LOAN_DB                                                  00030000
+  (                                                                     00040000
+  APPL_ID       CHAR(10) NOT NULL,                                      00050010
+  APPL_LID      CHAR(2)  NOT NULL UNIQUE,                               00060013
+  APPL_LTYPE    CHAR(10) CHECK(APPL_LTYPE IN ('HOUSING' ,               00070013
+                                           'EDUCATION' ,                00080000
+                                           'PERSONAL'  ,                00090000
+                                           'AGRICUL'   ,                00100000
+                                           'CAR'       ,                00110000
+                                           'BUSINESS')),                00120000
+  APPL_LAMT     INT NOT NULL,                                           00130006
+  APPL_LDATE    DATE,                                                   00140006
+  APPL_LTENURE  CHAR(2),                                                00150006
+  APPL_INRATE   DECIMAL(3,1),                                           00160006
+  APPL_LINDICAT CHAR(5)                                                 00170006
+  CHECK(APPL_LINDICAT IN ('OPEN', 'CLOSE')),                            00180006
+  APPL_RPAYDATE CHAR(2),                                                00190012
+  APPL_TRPAYAMT INT,                                                    00200012
+  APPL_MRPAYAMT DECIMAL(9,2),                                           00210012
+  APPL_NRPAYDTE DATE,                                                   00220012
+  APPL_BALAMT   DECIMAL(9,2)                                            00230012
+  )                                                                     00240000
+  IN SHRDB4.SHRTS4;                                                     00250000
+  COMMIT;                                                               00260000
+  CREATE UNIQUE INDEX LIDB ON                                           00270010
+  LOAN_DB(APPL_LID);                                                    00280013
+  COMMIT;                                                               00290000
+

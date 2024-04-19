@@ -1,0 +1,9 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//STEP1 EXEC PGM=CA11G210                                               00020002
+//STEPLIB DD DSN=TECN210.LOADMLIB.PDS,DISP=SHR                          00030001
+//DD1 DD DSN=TECN210.L1B.STUDENT.PS3,DISP=SHR                           00040003
+//DD2 DD DSN=TECN210.L1B.STUDENT.OUTPUT.KSDS,DISP=SHR                   00050001
+//SYSPRINT DD SYSOUT=*                                                  00060001
+//SYSOUT DD SYSOUT=*                                                    00070001
+//SYSIN DD DUMMY                                                        00080001
+

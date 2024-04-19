@@ -1,0 +1,227 @@
+       IDENTIFICATION DIVISION.                                         00010000
+       PROGRAM-ID. CA11G210.                                            00020000
+       ENVIRONMENT DIVISION.                                            00030000
+       INPUT-OUTPUT SECTION.                                            00040000
+       FILE-CONTROL.                                                    00050000
+      *************************************************                 00051003
+      *  ASSIGNING PHYSICAL FILE TO LOGICAL FILE                        00052003
+      *************************************************                 00053003
+             SELECT TI001-INPUT ASSIGN TO DD1                           00060002
+                    ORGANIZATION    IS SEQUENTIAL                       00070000
+                    ACCESS MODE     IS SEQUENTIAL                       00080000
+                    FILE STATUS     IS WS-FST-TI001                     00090000
+             .                                                          00100000
+             SELECT TO001-OUTPUT ASSIGN TO DD2                          00110002
+                    ORGANIZATION      IS INDEXED                        00120000
+                    ACCESS MODE       IS RANDOM                         00130000
+                    RECORD KEY        IS TO001-ID                       00140000
+                    FILE STATUS       IS WS-FST-TO001                   00150000
+             .                                                          00160000
+       DATA DIVISION.                                                   00170000
+       FILE SECTION.                                                    00180000
+      *************************************************                 00181003
+      *  FILE DESCRIPTION OF INPUT FILE                                 00182003
+      *************************************************                 00183003
+       FD TI001-INPUT.                                                  00190002
+       01 TI001-INPUT-REC.                                              00200002
+          05 TI001-ID          PIC 9(05).                               00210000
+          05 FILLER            PIC X(01).                               00220000
+          05 TI001-FNAME       PIC X(010).                              00230000
+          05 FILLER            PIC X(01).                               00240000
+          05 TI001-LNAME       PIC X(10).                               00250000
+          05 FILLER            PIC X(01).                               00260000
+          05 TI001-MARKS       PIC 9(2).9(2).                           00270000
+          05 FILLER     PIC X(47).                                      00280000
+      *************************************************                 00281003
+      * FILE DESCRIPTION OF OUTPUT FILE                                 00282003
+      *************************************************                 00283003
+       FD TO001-OUTPUT.                                                 00290002
+       01 TO001-OUTPUT-REC.                                             00300002
+          05 TO001-ID     PIC X(06).                                    00310000
+          05 FILLER     PIC X(01).                                      00320000
+          05 TO001-NAME   PIC X(15).                                    00330000
+          05 FILLER     PIC X(01).                                      00340000
+          05 TO001-MARKS      PIC 9(2).9(2).                            00350000
+          05 FILLER     PIC X(01).                                      00360000
+          05 TO001-PERCENTAGE  PIC 9(02).                               00370000
+          05 FILLER     PIC X(01).                                      00380000
+          05 TO001-RESULT     PIC X(30).                                00390000
+          05 FILLER     PIC X(18).                                      00400000
+       WORKING-STORAGE SECTION.                                         00410000
+      *************************************************                 00411003
+      * VARIABLE DECLARATION                                            00412003
+      *************************************************                 00413003
+       01 WS-VARS.                                                      00420000
+            05 WS-FST-TI001     PIC 9(02).                              00430000
+               88 C05-TI001-SUC VALUE 00.                               00440005
+               88 C05-TI001-EOF VALUE 10.                               00450005
+            05 WS-FST-TO001     PIC 9(02).                              00460000
+               88 C05-TO001-SUC VALUE 00.                               00470005
+               88 C05-TO001-EOF VALUE 10.                               00480005
+            05 WS-COUNTER       PIC 9(02).                              00500004
+            05 WS-VALID-REC     PIC 9(02).                              00510004
+            05 WS-INVALID-REC   PIC 9(02).                              00520004
+            05 WS-NAME          PIC X(10).                              00530004
+            05 WS-PER           PIC 9(02).                              00540004
+            05 NEW-RESULT       PIC X(13).                              00550004
+            05 WS-MARKS         PIC 99V99.                              00560004
+            05 WS-S             PIC X(01) VALUE "S".                    00561004
+       PROCEDURE DIVISION.                                              00570000
+       0000-MAIN-PARA.                                                  00580000
+              PERFORM 1000-INITIALIZE-PARA                              00590000
+                 THRU 1000-INITIALIZE-PARA-EXIT                         00600000
+              PERFORM 2000-PROCESS-PARA                                 00610000
+                 THRU 2000-PROCESS-PARA-EXIT                            00620000
+              PERFORM 9000-TERMINATION-PARA                             00630000
+                 .                                                      00640000
+        0000-MAIN-PARA-EXIT.                                            00650000
+                EXIT.                                                   00660000
+        1000-INITIALIZE-PARA.                                           00670000
+            INITIALIZE  WS-VALID-REC  WS-INVALID-REC                    00680005
+                        WS-PER   NEW-RESULT  WS-MARKS                   00682005
+                        WS-COUNTER.                                     00683005
+        1000-INITIALIZE-PARA-EXIT.                                      00690000
+                 EXIT.                                                  00700000
+        2000-PROCESS-PARA.                                              00710000
+             PERFORM 2100-OPEN-PARA                                     00720000
+                THRU 2100-OPEN-PARA-EXIT                                00730000
+             PERFORM 2200-READ-PARA                                     00740000
+                THRU 2200-READ-PARA-EXIT                                00750000
+               UNTIL C05-TI001-EOF                                      00760000
+             PERFORM 2300-CLOSE-PARA                                    00770000
+                THRU 2300-CLOSE-PARA-EXIT                               00780000
+                .                                                       00790000
+        2000-PROCESS-PARA-EXIT.                                         00800000
+                EXIT.                                                   00810000
+      *************************************************                 00811003
+      * OPENING INPUT PS FILE                                           00812003
+      *************************************************                 00813003
+        2100-OPEN-PARA.                                                 00820000
+             OPEN INPUT TI001-INPUT                                     00830002
+             EVALUATE TRUE                                              00840000
+             WHEN C05-TI001-SUC                                         00850000
+                 DISPLAY "FILE OPEN"                                    00860000
+             WHEN OTHER                                                 00870000
+                 DISPLAY "FILE OPEN FAILED " WS-FST-TI001               00880000
+                 PERFORM 9000-TERMINATION-PARA                          00890000
+             END-EVALUATE                                               00900000
+      **************************************************                00901004
+      * OPENING OUTPUT KSDS FILE                                        00902004
+      **************************************************                00903004
+             OPEN OUTPUT TO001-OUTPUT                                   00910002
+             EVALUATE TRUE                                              00920000
+             WHEN C05-TO001-SUC                                         00930000
+                 DISPLAY "FILE OPEN"                                    00940000
+             WHEN OTHER                                                 00950000
+                 DISPLAY "FILE OPEN FAILED" WS-FST-TO001                00960000
+                 PERFORM 9000-TERMINATION-PARA                          00970000
+             END-EVALUATE                                               00980000
+             .                                                          00990000
+        2100-OPEN-PARA-EXIT.                                            01000000
+             EXIT.                                                      01010000
+      *************************************************                 01011004
+      * READING INPUT PS FILE                                           01012004
+      *************************************************                 01013004
+        2200-READ-PARA.                                                 01020000
+             MOVE SPACES TO TI001-INPUT-REC                             01030002
+             MOVE SPACES TO TO001-OUTPUT-REC                            01040002
+             READ TI001-INPUT                                           01050002
+             EVALUATE TRUE                                              01060000
+             WHEN C05-TI001-SUC                                         01070000
+                ADD 1 TO WS-COUNTER                                     01080000
+                DISPLAY WS-COUNTER                                      01090000
+                PERFORM 2110-VALIDATE-PARA                              01100000
+                   THRU 2110-VALIDATE-PARA-EXIT                         01110000
+             WHEN C05-TI001-EOF                                         01120000
+                IF WS-COUNTER = 00                                      01130000
+                  DISPLAY " FILE TI001 IS EMPTY"                        01140000
+                ELSE                                                    01150000
+                  DISPLAY "NUMBER OF VALID RECORDS" WS-VALID-REC        01160000
+                  DISPLAY "NUMBER OF INVALID  RECORDS" WS-INVALID-REC   01170000
+                  DISPLAY "ALL REC PROCESS"                             01180000
+                END-IF                                                  01190000
+             WHEN OTHER                                                 01200000
+                  DISPLAY "TI001 READ FAILED " WS-FST-TI001             01210000
+                  .                                                     01220000
+       2200-READ-PARA-EXIT.                                             01230000
+              EXIT.                                                     01240000
+      *************************************************                 01241004
+      * VALIDATION OF INPUT PS FILE FIELDS                              01242004
+      *************************************************                 01243004
+       2110-VALIDATE-PARA.                                              01250000
+           EVALUATE TRUE                                                01260000
+           WHEN  TI001-ID         IS NUMERIC            AND             01270000
+                 TI001-FNAME      IS GREATER THAN SPACE AND             01280000
+                 TI001-LNAME      IS ALPHABETIC         AND             01290000
+                 TI001-MARKS(1:2) IS NUMERIC            AND             01300000
+                 TI001-MARKS(3:1) = '.'                 AND             01310000
+                 TI001-MARKS(4:2) IS NUMERIC                            01320000
+                   ADD 1 TO WS-VALID-REC                                01330000
+                   DISPLAY "INPUT FILE TI001 RECORD : " TI001-INPUT-REC 01340002
+                   PERFORM 2111-CALCI-PARA                              01350000
+                      THRU 2111-CALCI-PARA-EXIT                         01360000
+              WHEN OTHER                                                01370000
+                   ADD 1 TO WS-INVALID-REC                              01380000
+                  DISPLAY "INVALID REC :" WS-FST-TI001                  01390000
+              END-EVALUATE                                              01400000
+              .                                                         01410000
+       2110-VALIDATE-PARA-EXIT.                                         01420000
+              EXIT.                                                     01430000
+      *************************************************                 01431004
+      * OPERATION ON VALIDATED FIELDS                                   01432004
+      *************************************************                 01433004
+       2111-CALCI-PARA.                                                 01440000
+              MOVE WS-S(1:1) TO TO001-ID(1:1)                           01450000
+              MOVE TI001-ID(1:5) TO TO001-ID(2:5)                       01460000
+              MOVE TI001-FNAME TO WS-NAME                               01470000
+              INSPECT WS-NAME REPLACING ALL '@' BY SPACE                01480000
+                                               '%' BY SPACE             01490000
+                                               '$' BY SPACE             01500000
+                                               '@' BY SPACE             01510000
+                                               '&' BY SPACE             01520000
+              MOVE TI001-LNAME(1:1) TO TO001-NAME(1:1)                  01530000
+              MOVE "."  TO TO001-NAME(2:1)                              01540000
+              MOVE WS-NAME(1:8) TO TO001-NAME(3:8)                      01550000
+              MOVE TI001-MARKS TO TO001-MARKS                           01560000
+              MOVE TI001-MARKS TO WS-MARKS                              01570000
+              MOVE ZERO TO WS-PER                                       01580000
+              CALL 'CA21G210' USING WS-MARKS WS-PER                     01590000
+              MOVE WS-PER TO TO001-PERCENTAGE                           01600000
+              EVALUATE TRUE                                             01610000
+              WHEN WS-PER GREATER THAN 70                               01620000
+              MOVE "CONGRATULATIONS!!!" TO TO001-RESULT                 01630001
+              WHEN WS-PER LESS THAN 70                                  01640000
+              MOVE "BETTER LUCK NEXT TIME!!!" TO TO001-RESULT           01650000
+              END-EVALUATE                                              01660000
+              PERFORM 2112-WRITE-PARA                                   01670000
+                     THRU 2112-WRITE-EXIT-PARA                          01680000
+              .                                                         01690000
+       2111-CALCI-PARA-EXIT.                                            01700000
+              EXIT.                                                     01710000
+      *************************************************                 01711004
+      * WRITING TO OUTPUT KSDS FILE                                     01712004
+      *************************************************                 01713004
+       2112-WRITE-PARA.                                                 01720000
+              DISPLAY "OUTPUT FILE TO001 REC : " TO001-OUTPUT-REC       01730002
+              WRITE TO001-OUTPUT-REC                                    01740002
+              EVALUATE TRUE                                             01750000
+              WHEN C05-TO001-SUC                                        01760000
+                DISPLAY "RECORD WRITTEN  "                              01770000
+              WHEN OTHER                                                01780000
+                DISPLAY "RECORDS PROCESSING FAILED " WS-FST-TO001       01790000
+              END-EVALUATE                                              01800000
+               .                                                        01810000
+       2112-WRITE-EXIT-PARA.                                            01820000
+               EXIT.                                                    01830000
+      *************************************************                 01831004
+      * CLOSING THE INPUT PS AND OUTPUT KSDS FILE                       01832004
+      *************************************************                 01833004
+       2300-CLOSE-PARA.                                                 01840000
+               CLOSE TI001-INPUT TO001-OUTPUT                           01850002
+               .                                                        01860000
+       2300-CLOSE-PARA-EXIT.                                            01870000
+                EXIT.                                                   01880000
+       9000-TERMINATION-PARA.                                           01890000
+                STOP RUN.                                               01900000
+       9000-TERMINATION-PARA-EXIT.                                      01910000
+

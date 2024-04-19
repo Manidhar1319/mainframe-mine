@@ -1,0 +1,25 @@
+//TECN210S JOB NOTIFY=&SYSUID                                           00010001
+//STEP1 EXEC PGM=SORT                                                   00020001
+//SYSPRINT DD SYSOUT=*                                                  00030001
+//SYSOUT DD SYSOUT=*                                                    00040001
+//SORTIN DD DSN=TECN210.L1B.STUDENT.PS1,DISP=SHR                        00050001
+//       DD DSN=TECN210.L1B.STUDENT.PS2,DISP=SHR                        00060001
+//SORTOUT DD DSN=TECN210.L1B.STUDENT.PS3,DISP=(NEW,CATLG,DELETE),       00070001
+//           SPACE=(TRK,(1,1)),VOL=SER=ZAPRD4,                          00080001
+//           DCB=(BLKSIZE=800,RECFM=FB,LRECL=80)                        00090001
+//SYSIN DD *                                                            00100001
+   SORT FIELDS=(1,5,CH,A)                                               00110001
+   OMIT COND=(1,10,CH,EQ,C'STUDENT_ID')                                 00120001
+   OUTREC FIELDS=(1,5,ZD,ADD,+1,EDIT=(TTTTT),6,33)                      00130001
+/*                                                                      00140001
+//STEP2 EXEC PGM=IDCAMS                                                 00150001
+//SYSPRINT DD SYSOUT=*                                                  00160001
+//SYSOUT DD SYSOUT=*                                                    00170001
+//DD1 DD DSN=TECN210.L1B.STUDENT.PS3,DISP=SHR                           00180001
+//DD2 DD DSN=TECN210.L1B.STUDENT.REFER.KSDS,DISP=SHR                    00190001
+//SYSIN DD *                                                            00200001
+   REPRO -                                                              00210001
+   INFILE(DD1) -                                                        00220001
+   OUTFILE(DD2)                                                         00230001
+/*                                                                      00240001
+

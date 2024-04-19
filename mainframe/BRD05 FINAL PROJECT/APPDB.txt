@@ -1,0 +1,18 @@
+  DROP TABLE APPLICANT_DB;                                              00010006
+  CREATE TABLE APPLICANT_DB                                             00020000
+       (                                                                00030000
+       APPL_ID        CHAR(10)    NOT NULL UNIQUE,                      00040005
+       APPL_NAME      VARCHAR(32) NOT NULL,                             00050003
+       APPL_DNO       CHAR(10)    NOT NULL,                             00060004
+       APPL_STREET    CHAR(20)    NOT NULL,                             00070003
+       APPL_CITY      CHAR(20)    NOT NULL,                             00080003
+       APPL_STATE     CHAR(20)    NOT NULL,                             00090003
+       APPL_PIN       INT         NOT NULL,                             00100004
+       APPL_CEPNO     CHAR(10)                                          00110004
+       )                                                                00120000
+  IN SHRDB4.SHRTS4;                                                     00130000
+  COMMIT;                                                               00140000
+  CREATE UNIQUE INDEX APPLICANT ON                                      00150007
+  APPLICANT_DB(APPL_ID);                                                00160003
+  COMMIT;                                                               00170000
+

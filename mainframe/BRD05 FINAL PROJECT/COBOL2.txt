@@ -1,0 +1,320 @@
+       IDENTIFICATION DIVISION.                                         00010001
+       PROGRAM-ID. BRD05CB2.                                            00020001
+       AUTHOR. BRD05.                                                   00021001
+      ****************************************************************  00022001
+      *                    PROGRAM DESCRIPTION                       *  00023001
+      ****************************************************************  00024001
+      *  THIS PROGRAM IS PREPARING THE REPORT ON LOAN APPLPLICANTS   *  00025001
+      *  WHOSE LOAN APPROVAL DATE GREATER THAN 31-12-2010 FROM       *  00026001
+      *                     HISTORY DATA BASE.                       *  00027001
+      ****************************************************************  00028001
+      *     AUTHOR : S.MADHUMITHA       (2317819)                    *  00029001
+      *              O.PRAVEEN          (2317754)                    *  00029101
+      *              V.RAVIPRAKASH      (2317838)                    *  00029201
+      *              K.LOKESH           (2317360)                    *  00029301
+      *              M.MANIDHAR         (2317376)                    *  00029401
+      ****************************************************************  00029501
+       ENVIRONMENT DIVISION.                                            00030001
+      ****************************************************************  00031001
+       INPUT-OUTPUT SECTION.                                            00040001
+       FILE-CONTROL.                                                    00050001
+             SELECT REPORTPS ASSIGN TO DD1                              00060001
+             ORGANIZATION IS SEQUENTIAL                                 00070001
+             ACCESS MODE IS SEQUENTIAL                                  00080001
+             FILE STATUS IS WS-FS1.                                     00090001
+      ****************************************************************  00091001
+       DATA DIVISION.                                                   00100001
+      ****************************************************************  00101001
+       FILE SECTION.                                                    00110001
+       FD REPORTPS.                                                     00120001
+      ***********************FILE STRUCTURE OF REPORT*****************  00121001
+       01 REPORT-REC PIC X(80).                                         00130001
+       WORKING-STORAGE SECTION.                                         00140001
+       01 INPUT-REC.                                                    00150001
+           05 FILLER            PIC X(5).                               00160001
+           05 WS-APPLICANT-ID   PIC X(10).                              00170002
+           05 FILLER            PIC X(4).                               00180001
+           05 WS-APPLICANT-NAME PIC X(15).                              00190002
+           05 FILLER            PIC X(2).                               00200001
+           05 WS-LOAN-DATE      PIC X(10).                              00210002
+           05 FILLER            PIC X(6).                               00220001
+           05 WS-LOAN-INDICATOR PIC X(5).                               00230002
+           05 FILLER            PIC X(23).                              00240001
+       01 WS-FS1                PIC 9(2).                               00250001
+           88 WS-SUC1           VALUE 00.                               00260002
+           88 WS-EOF            VALUE 10.                               00270002
+       01 WS-ERR.                                                       00280001
+           05 WS-ERR-MSG.                                               00290001
+               10 WS-ERR-LEN    PIC S9(4) COMP VALUE +720.              00300002
+               10 WS-ERR-TEXT   PIC X(80) OCCURS 10 TIMES.              00310002
+           05 WS-ERR-LRECL      PIC S9(9) COMP VALUE +72.               00320002
+       01 WS-SQLCODE            PIC S9(3) SIGN LEADING SEPARATE.        00330002
+           88 WS-SUC            VALUE +000.                             00340002
+           88 WS-EOT            VALUE +100.                             00350002
+       01 WS-SPACE              PIC X(80) VALUE SPACES.                 00360001
+      *************************STRUCTURE OF HEADER COLUMN***************00361001
+       01 WS-HEADER-REC.                                                00370001
+           05 FILLER            PIC X(5) VALUE SPACES.                  00380001
+           05 FILLER            PIC X(12) VALUE 'APPLICANT ID'.         00390001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00400001
+           05 FILLER            PIC X(15) VALUE 'NAME'.                 00410001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00420001
+           05 FILLER            PIC X(14) VALUE 'APPR LOAN DATE'.       00430001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00440001
+           05 FILLER            PIC X(14) VALUE 'LOAN INDICATOR'.       00450001
+           05 FILLER            PIC X(14) VALUE SPACES.                 00460001
+      *****************STRUCTURE TO ADD UNDERLINING OF HEADER***********00461001
+       01 WS-DASH-REC.                                                  00470001
+           05 FILLER            PIC X(5) VALUE SPACES.                  00480001
+           05 FILLER            PIC X(12) VALUE ALL '-'.                00490001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00500001
+           05 FILLER            PIC X(15) VALUE ALL '-'.                00510001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00520001
+           05 FILLER            PIC X(14) VALUE ALL '-'.                00530001
+           05 FILLER            PIC X(2) VALUE SPACES.                  00540001
+           05 FILLER            PIC X(14) VALUE ALL '-'.                00550001
+           05 FILLER            PIC X(14) VALUE SPACES.                 00560001
+      **********************HEADING OF REPORT*************************  00561001
+       01 WS-TITLE.                                                     00570001
+           05 FILLER            PIC X(29) VALUE SPACES.                 00580001
+           05 FILLER            PIC X(21) VALUE 'HISTORY DETAIL REPORT'.00590001
+           05 FILLER            PIC X(30) VALUE SPACES.                 00600001
+      ***************************HEADER1******************************* 00601001
+       01 WS-HEADER1.                                                   00610001
+           05 FILLER            PIC X(5) VALUE SPACES.                  00620001
+           05 WS-DATE1          PIC X(6) VALUE 'DATE'.                  00630001
+           05 WS-DATE2.                                                 00640001
+              06 WS-YEAR        PIC 9(4).                               00650001
+              06 FILLER         PIC X VALUE '-'.                        00660001
+              06 WS-MONTH       PIC 9(2).                               00670002
+              06 FILLER         PIC X VALUE '-'.                        00680001
+              06 WS-DAY         PIC 9(2).                               00690002
+           05 FILLER            PIC X(38) VALUE SPACES.                 00700001
+           05 WS-PAGE-NO1       PIC X(6) VALUE 'PAGE:'.                 00710002
+           05 WS-PAGE-NO2       PIC 9(02) VALUE 01.                     00720002
+           05 FILLER            PIC X(12) VALUE SPACES.                 00730001
+      ***************************HEADER2********************************00731002
+       01 WS-HEADER2.                                                   00740001
+           05 FILLER            PIC X(5) VALUE SPACES.                  00750001
+           05 WS-TIME1          PIC X(6) VALUE 'TIME'.                  00760001
+           05 WS-TIME2.                                                 00770001
+              06 WS-HOUR        PIC 9(2).                               00780001
+              06 FILLER         PIC X VALUE ':'.                        00790001
+              06 WS-MIN         PIC 9(2).                               00800001
+              06 FILLER         PIC X VALUE ':'.                        00810001
+              06 WS-SEC         PIC 9(2).                               00820001
+           05 FILLER            PIC X(40) VALUE SPACES.                 00830001
+           05 WS-REPORT1        PIC X(11) VALUE 'REPORT ID: '.          00840001
+           05 WS-REPORT2        PIC 9(4) VALUE 1005.                    00850001
+           05 FILLER            PIC X(4) VALUE SPACES.                  00860001
+      ***************************HEADER3********************************00861002
+       01 WS-HEADER3.                                                   00870001
+           05 FILLER            PIC X(56).                              00880001
+           05 WS-PAGE-NO3       PIC X(7) VALUE 'PAGE:'.                 00890002
+           05 WS-PAGE-NO4       PIC 9(02) VALUE 01.                     00900002
+           05 FILLER            PIC X(15) VALUE SPACES.                 00910001
+      ***************************HEADER4********************************00911002
+       01 WS-HEADER4.                                                   00920001
+           05 FILLER            PIC X(56).                              00930001
+           05 WS-REPORT3        PIC X(11) VALUE 'REPORT ID:'.           00940001
+           05 WS-REPORT4        PIC 9(4) VALUE 1005.                    00950001
+           05 FILLER            PIC X(19) VALUE SPACES.                 00960001
+      ***************************TRAILER1*******************************00961002
+       01 WS-TRAILER1.                                                  00970001
+           05 FILLER            PIC X(13) VALUE SPACES.                 00980001
+           05 FILLER            PIC X(20) VALUE ALL '-'.                00990001
+           05 FILLER            PIC X VALUE SPACES.                     01000001
+           05 FILLER            PIC X(11) VALUE 'END OF PAGE'.          01010001
+           05 FILLER            PIC X VALUE SPACES.                     01020001
+           05 FILLER            PIC X(20) VALUE ALL '-'.                01030001
+           05 FILLER            PIC X(14) VALUE SPACES.                 01040001
+      ***************************TRAILER2*******************************01041002
+       01 WS-TRAILER2.                                                  01050001
+           05 FILLER            PIC X(13) VALUE SPACES.                 01060001
+           05 FILLER            PIC X(20) VALUE ALL '*'.                01070003
+           05 FILLER            PIC X VALUE SPACES.                     01080001
+           05 FILLER            PIC X(13) VALUE 'END OF REPORT'.        01090001
+           05 FILLER            PIC X VALUE SPACES.                     01100001
+           05 FILLER            PIC X(20) VALUE ALL '*'.                01110001
+           05 FILLER            PIC X(13) VALUE SPACES.                 01120001
+       01 WS-COUNTER.                                                   01130001
+           05 LINE-CTR          PIC 9(2) VALUE ZEROES.                  01140001
+      ***************************SQL INCLUDE STATEMENTS*****************01141002
+            EXEC SQL                                                    01150001
+               INCLUDE SQLCA                                            01160001
+            END-EXEC.                                                   01170001
+            EXEC SQL                                                    01180001
+               INCLUDE HISDCL                                           01190001
+            END-EXEC.                                                   01200001
+      ***************************CURSOR DECLARATION*********************01201002
+               EXEC SQL                                                 01210001
+                  DECLARE CSR3 CURSOR FOR                               01220001
+                    SELECT APPLICANT_ID, APPLICANT_NAME,                01230001
+                           LOAN_APPR_DATE                               01240001
+                    FROM HISTORY_DB                                     01250001
+                    WHERE LOAN_APPR_DATE > '2010-12-31'                 01260001
+               END-EXEC.                                                01270001
+      ******************************************************************01271002
+       PROCEDURE DIVISION.                                              01280001
+      ******************************************************************01281002
+       0000-MAIN-PARA.                                                  01290001
+           PERFORM 1000-INITIALIZE-PARA THRU                            01300001
+                   1000-INITIALIZE-EXIT.                                01310001
+           PERFORM 2000-PROCESS-PARA THRU                               01320001
+                   2000-PROCESS-EXIT.                                   01330001
+           PERFORM 9000-TERMINATION-PARA THRU                           01340001
+                   9000-TERMINATION-EXIT.                               01350001
+       0000-MAIN-EXIT.                                                  01360001
+           EXIT.                                                        01370001
+      ******************************************************************01371002
+       1000-INITIALIZE-PARA.                                            01380001
+           DISPLAY 'REPORT CREATION STARTED'.                           01390001
+       1000-INITIALIZE-EXIT.                                            01400001
+           EXIT.                                                        01410001
+      ******************************************************************01411002
+       2000-PROCESS-PARA.                                               01420001
+           PERFORM 2100-OPEN-PARA THRU                                  01430001
+                   2100-OPEN-EXIT.                                      01440001
+           PERFORM 2150-MOVE1-PARA  THRU                                01441006
+                   2150-MOVE1-EXIT.                                     01442006
+           PERFORM 2200-FETCH-PARA THRU                                 01450001
+                   2200-FETCH-EXIT UNTIL WS-EOT.                        01460001
+           PERFORM 2300-CLOSE-PARA THRU                                 01470001
+                   2300-CLOSE-EXIT.                                     01480001
+       2000-PROCESS-EXIT.                                               01490001
+           EXIT.                                                        01500001
+      ******************************************************************01501002
+       2100-OPEN-PARA.                                                  01510001
+           EXEC SQL                                                     01520001
+              OPEN CSR3                                                 01530001
+           END-EXEC.                                                    01540001
+           MOVE SQLCODE TO WS-SQLCODE.                                  01550001
+           EVALUATE TRUE                                                01560001
+             WHEN WS-SUC                                                01570001
+               DISPLAY 'CURSOR OPENED SUCCESSFULLY'                     01580001
+             WHEN OTHER                                                 01590001
+               DISPLAY 'CURSOR OPENED FAILED'                           01600001
+               DISPLAY 'SQLCODE :' WS-SQLCODE                           01610001
+               CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG, WS-ERR-LRECL     01620001
+               DISPLAY WS-ERR-MSG                                       01630001
+             PERFORM 9000-TERMINATION-PARA THRU                         01640001
+                     9000-TERMINATION-EXIT                              01650001
+           END-EVALUATE.                                                01660001
+      ******************OPENING OF REPORT TO WRITE**********************01661002
+           OPEN OUTPUT REPORTPS                                         01670001
+           EVALUATE TRUE                                                01680001
+             WHEN WS-SUC1                                               01690001
+               DISPLAY 'REPORT FILE OPENED SUCCESSFULLY'                01700001
+             WHEN OTHER                                                 01710001
+               DISPLAY 'REPORT FILE OPENED FAILED'                      01720001
+               DISPLAY 'FILE STATUS CODE :' WS-FS1                      01730001
+             PERFORM 9000-TERMINATION-PARA THRU                         01740001
+                     9000-TERMINATION-EXIT                              01750001
+           END-EVALUATE.                                                01760001
+       2100-OPEN-EXIT.                                                  01770001
+           EXIT.                                                        01780001
+       2150-MOVE1-PARA.                                                 01790006
+              MOVE FUNCTION CURRENT-DATE(1:4)  TO WS-YEAR.              01800004
+              MOVE FUNCTION CURRENT-DATE(5:2)  TO WS-MONTH.             01800104
+              MOVE FUNCTION CURRENT-DATE(7:2)  TO WS-DAY.               01800204
+              MOVE FUNCTION CURRENT-DATE(9:2)  TO WS-HOUR.              01800304
+              MOVE FUNCTION CURRENT-DATE(11:2)  TO WS-MIN.              01800404
+              MOVE FUNCTION CURRENT-DATE(13:2)  TO WS-SEC.              01800504
+                   WRITE REPORT-REC FROM WS-SPACE.                      01800604
+                   WRITE REPORT-REC FROM WS-TITLE.                      01800704
+                   WRITE REPORT-REC FROM WS-HEADER1.                    01800804
+                   WRITE REPORT-REC FROM WS-HEADER2.                    01800904
+                   WRITE REPORT-REC FROM WS-SPACE.                      01801007
+                   WRITE REPORT-REC FROM WS-HEADER-REC.                 01801104
+                   WRITE REPORT-REC FROM WS-DASH-REC.                   01801204
+                   MOVE 7 TO LINE-CTR.                                  01801307
+       2150-MOVE1-EXIT.                                                 01801406
+           EXIT.                                                        01801504
+      ******************************************************************01801602
+      *     DCLGEN DEFINATION : HD ---> HISTORY DB DCLGEN               01802002
+      ******************************************************************01803002
+       2200-FETCH-PARA.                                                 01810001
+           INITIALIZE HD-APPLICANT-NAME.                                01820001
+           MOVE SPACES TO HD-APPLICANT-NAME-TEXT.                       01830001
+            EXEC SQL                                                    01840001
+              FETCH CSR3 INTO :HD-APPLICANT-ID,                         01850001
+                              :HD-APPLICANT-NAME,                       01860001
+                              :HD-LOAN-APPR-DATE                        01870001
+            END-EXEC.                                                   01880001
+           MOVE SQLCODE TO WS-SQLCODE.                                  01890001
+           EVALUATE TRUE                                                01900001
+             WHEN WS-SUC                                                01910001
+               DISPLAY 'CURSOR FETCHED SUCCESSFULLY'                    01920001
+               ADD 1 TO LINE-CTR                                        01930001
+               PERFORM 2250-MOVE-PARA THRU                              01940006
+                       2250-MOVE-EXIT                                   01950006
+             WHEN WS-EOT                                                01960001
+               DISPLAY 'NO MORE DATA TO FETCH'                          01970001
+               WRITE REPORT-REC FROM WS-TRAILER1                        01971005
+               WRITE REPORT-REC FROM WS-TRAILER2                        01980005
+             WHEN OTHER                                                 02000001
+               DISPLAY 'FAILED TO FETCH DATA'                           02010001
+               DISPLAY 'SQLCODE :' WS-SQLCODE                           02020001
+               CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG, WS-ERR-LRECL     02030001
+               DISPLAY WS-ERR-MSG                                       02040001
+             PERFORM 9000-TERMINATION-PARA THRU                         02050001
+                     9000-TERMINATION-EXIT                              02060001
+           END-EVALUATE.                                                02070001
+       2200-FETCH-EXIT.                                                 02080001
+           EXIT.                                                        02090001
+       2250-MOVE-PARA.                                                  02091006
+             MOVE HD-APPLICANT-ID TO WS-APPLICANT-ID.                   02092006
+             MOVE HD-APPLICANT-NAME-TEXT TO WS-APPLICANT-NAME.          02093006
+             MOVE HD-LOAN-APPR-DATE TO WS-LOAN-DATE.                    02094006
+             MOVE 'CLOSE' TO WS-LOAN-INDICATOR.                         02095006
+             WRITE REPORT-REC FROM INPUT-REC.                           02096006
+             DISPLAY LINE-CTR.                                          02097006
+           IF (LINE-CTR >= 12)                                          02098006
+             MOVE ZEROS TO LINE-CTR                                     02099006
+             ADD 1 TO WS-PAGE-NO4                                       02099106
+             WRITE REPORT-REC FROM WS-SPACE                             02099206
+             WRITE REPORT-REC FROM WS-TRAILER1                          02099306
+             WRITE REPORT-REC FROM WS-HEADER3                           02099406
+             WRITE REPORT-REC FROM WS-HEADER4                           02099506
+             WRITE REPORT-REC FROM WS-SPACE                             02099608
+             WRITE REPORT-REC FROM WS-HEADER-REC                        02099706
+             WRITE REPORT-REC FROM WS-DASH-REC                          02099806
+             MOVE 7 TO LINE-CTR                                         02099907
+           END-IF.                                                      02100006
+       2250-MOVE-EXIT.                                                  02100106
+           EXIT                                                         02100206
+           .                                                            02100306
+       2300-CLOSE-PARA.                                                 02101001
+           EXEC SQL                                                     02110001
+             CLOSE CSR3                                                 02120001
+           END-EXEC.                                                    02130001
+           MOVE SQLCODE TO WS-SQLCODE.                                  02140001
+           EVALUATE TRUE                                                02150001
+             WHEN WS-SUC                                                02160001
+               DISPLAY 'CURSOR CLOSED SUCCESSFULLY'                     02170001
+             WHEN OTHER                                                 02180001
+               DISPLAY 'CURSOR CLOSED FAILED'                           02190001
+               DISPLAY 'SQLCODE :' WS-SQLCODE                           02200001
+               CALL 'DSNTIAR' USING SQLCA, WS-ERR-MSG, WS-ERR-LRECL     02210001
+               DISPLAY WS-ERR-MSG                                       02220001
+             PERFORM 9000-TERMINATION-PARA THRU                         02230001
+                     9000-TERMINATION-EXIT                              02240001
+           END-EVALUATE.                                                02250001
+           CLOSE REPORTPS                                               02260001
+           EVALUATE TRUE                                                02270001
+             WHEN WS-SUC1                                               02280001
+               DISPLAY 'REPORT FILE OPENED SUCCESSFULLY'                02290001
+             WHEN OTHER                                                 02300001
+               DISPLAY 'REPORT FILE OPENED FAILED'                      02310001
+               DISPLAY 'FILE STATUS CODE :' WS-FS1                      02320001
+             PERFORM 9000-TERMINATION-PARA THRU                         02330001
+                     9000-TERMINATION-EXIT                              02340001
+           END-EVALUATE.                                                02350001
+       2300-CLOSE-EXIT.                                                 02360001
+           EXIT.                                                        02370001
+      ******************************************************************02711002
+       9000-TERMINATION-PARA.                                           02720001
+           STOP RUN.                                                    02730001
+       9000-TERMINATION-EXIT.                                           02740001
+           EXIT.                                                        02750001
+
